@@ -61,7 +61,7 @@ namespace CheckURI
 			bool isSucces = true;
 
 			StringBuilder stringBuilder = new("Failed tests:\n");
-			stringBuilder.AppendLine("\nValidUris:");
+
 			foreach (var validUri in validUris)
 			{
 				bool result = IsAllowed(validUri);
@@ -72,7 +72,6 @@ namespace CheckURI
 				isSucces &= result;
 			}
 
-			stringBuilder.AppendLine("\nInvalidUris:");
 			foreach (var invalidUri in invalidUris)
 			{
 				bool result = IsAllowed(invalidUri);
