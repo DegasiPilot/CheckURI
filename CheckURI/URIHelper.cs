@@ -1,91 +1,107 @@
 ﻿
+using System.Text;
+
 namespace CheckURI
 {
-	public static class URIHelper
+	public static class InternalUriHelper
 	{
-        static string[] allowedPatterns = new string[]
-        {
-            ".tatneft.ru",
-            ".tatneft.tatar",
+		#region Fields
+
+		static string[] allowedPatterns = new string[]
+		{
+			"tatneft.ru",
+			"tatneft.tatar",
+		};
+
+		private static readonly Uri[] validUris =
+		{
+			new Uri("https://test.tatneft.ru"),
+			new Uri("https://sub.test.tatneft.ru"),
+			new Uri("http://example.tatneft.tatar"),
+			new Uri("https://test.tatneft.ru/"),
+			new Uri("https://sub.test.tatneft.ru/path"),
+			new Uri("http://example.tatneft.tatar/"),
+			new Uri("https://test.tatneft.ru?param=value"),
+			new Uri("https://test.tatneft.tatar/?query=123"),
+			new Uri("https://test.tatneft.ru:8080"),
+			new Uri("http://example.tatneft.tatar:1234/path"),
+            new Uri("https://tatneft.ru"),
+            new Uri("ftp://test.tatneft.ru")
         };
 
+		private static readonly Uri[] invalidUris =
+		{
+			new Uri("https://test.tatneft.com"),
+			new Uri("https://example.tatneft.tatarr"),
+			new Uri("https://google.com"),
+		};
 
-        public static bool CheckUri(Uri uri)
-        {
-            if (uri is null)
-                return false;
+        #endregion
 
-            foreach (var pattern in allowedPatterns)
-            {
-                if (uri.AbsoluteUri.Contains(pattern))
-                {
-                    return true;
-                }
-            }
+        #region Private methods
 
-            return false;
+		private static bool CheckAndPrint(Uri checkingUri, StringBuilder stringBuilder)
+		{
+            bool result = IsAllowed(checkingUri);
+            stringBuilder.Append(result);
+            stringBuilder.Append(": ");
+            stringBuilder.AppendLine(checkingUri.ToString());
+            return result;
         }
 
-        public static bool RunTests()
-        {
-            // Прямое совпадение
-            if (!CheckUri(new Uri("https://test.tatneft.ru")) ||
-                !CheckUri(new Uri("https://sub.test.tatneft.ru")) ||
-                !CheckUri(new Uri("http://example.tatneft.tatar")))
-            {
-                return false;
+        #endregion
+
+        #region Public methods
+
+        public static bool IsAllowed(Uri uri)
+		{
+			if (uri is null)
+				return false;
+
+			foreach (var pattern in allowedPatterns)
+			{
+				if (uri.Host == pattern || uri.Host.EndsWith('.' + pattern))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public static bool RunTests()
+		{
+			StringBuilder stringBuilder = new();
+			bool isSucces = true;
+
+            stringBuilder.Append(typeof(InternalUriHelper).Name);
+            stringBuilder.AppendLine(" RunTests()");
+
+            stringBuilder.AppendLine("Result | Test");
+
+            stringBuilder.AppendLine("\nValidUris:");
+            foreach (var validUri in validUris)
+			{
+				isSucces = isSucces && CheckAndPrint(validUri, stringBuilder);
+			}
+
+            stringBuilder.AppendLine("\nInvalidUris:");
+            foreach (var invalidUri in invalidUris)
+			{
+                isSucces = isSucces && !CheckAndPrint(invalidUri, stringBuilder);
             }
 
-            // С завершающим слешем
-            if (!CheckUri(new Uri("https://test.tatneft.ru/")) ||
-                !CheckUri(new Uri("https://sub.test.tatneft.ru/path")) ||
-                !CheckUri(new Uri("http://example.tatneft.tatar/")))
-            {
-                return false;
-            }
+			stringBuilder.Append('\n');
+			stringBuilder.Append(typeof(InternalUriHelper).Name);
+            stringBuilder.Append(" test result: ");
+            stringBuilder.Append(isSucces);
 
-            // Несовпадающие домены
-            if (CheckUri(new Uri("https://test.tatneft.com")) || // другой домен
-                CheckUri(new Uri("https://example.tateft.tatar"))) // опечатка
-            {
-                return false;
-            }
+			System.Diagnostics.Debug.WriteLine(stringBuilder.ToString());
 
-            // Другой URL
-            if (CheckUri(new Uri("https://google.com")))
-            {
-                return false;
-            }
-
-            // Другой протокол
-            if (!CheckUri(new Uri("ftp://test.tatneft.ru")))
-            {
-                return false;
-            }
-
-            // Пустой URI
-            if (CheckUri(null))
-            {
-                return false;
-            }
-
-
-            // С параметрами запроса
-            if (!CheckUri(new Uri("https://test.tatneft.ru?param=value")) ||
-                !CheckUri(new Uri("https://test.tatneft.tatar/?query=123")))
-            {
-                return false;
-            }
-
-            // С указанием порта
-            if (!CheckUri(new Uri("https://test.tatneft.ru:8080")) ||
-                !CheckUri(new Uri("http://example.tatneft.tatar:1234/path")))
-            {
-                return false;
-            }
-
-            return true;
+			return isSucces;
         }
-    }
+
+		#endregion
+	}
 }
 
