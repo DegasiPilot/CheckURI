@@ -9,8 +9,8 @@ namespace CheckURI
 
 		static string[] allowedPatterns = new string[]
 		{
-			"tatneft.ru",
-			"tatneft.tatar",
+			".tatneft.ru",
+			".tatneft.tatar",
 		};
 
 		static readonly Uri[] validUris =
@@ -34,6 +34,7 @@ namespace CheckURI
 			new Uri("https://test.tatneft.com"),
 			new Uri("https://example.tatneft.tatarr"),
 			new Uri("https://google.com"),
+			null
 		};
 
 		#endregion
@@ -47,7 +48,7 @@ namespace CheckURI
 
 			foreach (var pattern in allowedPatterns)
 			{
-				if (uri.Host.EndsWith('.' + pattern))
+				if (uri.Host.EndsWith(pattern))
 				{
 					return true;
 				}
@@ -56,44 +57,45 @@ namespace CheckURI
 			return false;
 		}
 
-		public static bool RunTests()
+		public static void RunTests()
 		{
 			bool isSucces = true;
 
-			StringBuilder stringBuilder = new("Failed tests:\n");
+			StringBuilder failedTestsBuilder = new("\nFailed tests:\n");
 
 			foreach (var validUri in validUris)
 			{
-				bool result = IsAllowed(validUri);
-				if (!result)
+				bool isAllowed = IsAllowed(validUri);
+				isSucces &= isAllowed;
+
+				if (!isAllowed)
 				{
-					stringBuilder.AppendLine(validUri.AbsoluteUri);
+					AppendUri(validUri);
 				}
-				isSucces &= result;
 			}
 
 			foreach (var invalidUri in invalidUris)
 			{
-				bool result = IsAllowed(invalidUri);
-				if (result)
+				bool isAllowed = IsAllowed(invalidUri);
+				isSucces &= !isAllowed;
+
+				if (isAllowed)
 				{
-					stringBuilder.AppendLine(invalidUri.AbsoluteUri);
+					AppendUri(invalidUri);
 				}
-				isSucces &= !result;
 			}
 
-			string output = $"{nameof(InternalUriHelper)} test result: {isSucces}\n";
+			string output = $"{nameof(InternalUriHelper)} test result: {isSucces}";
 			if (!isSucces)
 			{
-				output += stringBuilder.ToString();
+				output += failedTestsBuilder.ToString().Trim('\n');
 			}
 
 			System.Diagnostics.Debug.WriteLine(output);
 
-			return isSucces;
+			void AppendUri(Uri appendingUri) => failedTestsBuilder.Append(appendingUri is null ? "null" : appendingUri.AbsoluteUri);
 		}
 
 		#endregion
 	}
 }
-
