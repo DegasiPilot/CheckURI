@@ -1,5 +1,4 @@
-﻿
-using System.Text;
+﻿using System.Text;
 
 namespace CheckURI
 {
@@ -25,8 +24,8 @@ namespace CheckURI
 			new Uri("https://test.tatneft.tatar/?query=123"),
 			new Uri("https://test.tatneft.ru:8080"),
 			new Uri("http://example.tatneft.tatar:1234/path"),
-			new Uri("ftp://test.tatneft.ru")
-		};
+			new Uri("ftp://test.tatneft.ru"),
+        };
 
 		static readonly Uri[] invalidUris =
 		{
@@ -34,7 +33,7 @@ namespace CheckURI
 			new Uri("https://test.tatneft.com"),
 			new Uri("https://example.tatneft.tatarr"),
 			new Uri("https://google.com"),
-			null
+            null
 		};
 
 		#endregion
@@ -88,12 +87,13 @@ namespace CheckURI
 			string output = $"{nameof(InternalUriHelper)} test result: {isSucces}";
 			if (!isSucces)
 			{
-				output += failedTestsBuilder.ToString().Trim('\n');
+				output += failedTestsBuilder.ToString();
+				output = output.Trim();
 			}
 
 			System.Diagnostics.Debug.WriteLine(output);
 
-			void AppendUri(Uri appendingUri) => failedTestsBuilder.Append(appendingUri is null ? "null" : appendingUri.AbsoluteUri);
+			void AppendUri(Uri appendingUri) => failedTestsBuilder.AppendLine(appendingUri is null ? "null" : appendingUri.AbsoluteUri);
 		}
 
 		#endregion
